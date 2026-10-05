@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulasi 2: Atur Sendiri Datanya</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f6f9;--fg:#14202e;--mut:#56657a;--card:#fff;--line:#cfd8e3;--in:#1f6fd1;--out:#12906a;--vap:#d9701b;--box:#e6edf5;--bad:#c4372f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e141c;--fg:#e4ebf3;--mut:#93a3b8;--card:#17202b;--line:#2b3949;--in:#5aa2ff;--out:#3fcf9f;--vap:#ff9a4d;--box:#223042;--bad:#ff7b72}}
+:root[data-theme="dark"]{--bg:#0e141c;--fg:#e4ebf3;--mut:#93a3b8;--card:#17202b;--line:#2b3949;--in:#5aa2ff;--out:#3fcf9f;--vap:#ff9a4d;--box:#223042;--bad:#ff7b72}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:4px 0 2px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.95rem}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.row button{flex:1;min-width:96px;padding:9px 12px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.row button[aria-selected="true"]{border-color:var(--in);background:var(--in);color:#fff}
+.row.sm button{flex:0 1 auto;min-width:0;font-weight:500;padding:6px 12px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--vap);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.q{margin:0 0 8px;font-size:1.02rem}
+.tag{display:inline-block;font-size:.8rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-bottom:6px}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font:600 13px "Segoe UI",system-ui,sans-serif}
+svg .s{font-weight:400;fill:var(--mut);font-size:12px}
+svg .u{fill:var(--vap);font-weight:700}
+.flow{stroke-dasharray:12 9;animation:mv 1s linear infinite}
+@keyframes mv{to{stroke-dashoffset:-21}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.ans{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px 18px}
+.ans label{display:block;font-size:.92rem;font-weight:600;margin-bottom:2px}
+.ans input{width:100%;padding:9px 10px;font:inherit;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.ans input.ok{border-color:var(--out)}.ans input.no{border-color:var(--bad)}
+.fb{font-size:.88rem;min-height:1.2em}.fb.ok{color:var(--out)}.fb.no{color:var(--bad)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:9px 16px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;cursor:pointer}
+.btn.p{background:var(--in);border-color:var(--in);color:#fff;font-weight:600}
+.msg{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--box);font-size:.93rem}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600;font-size:.88rem}
+.ok{color:var(--out);font-weight:700}
+.eq{margin-top:10px;padding:10px 12px;background:var(--box);border-radius:8px;font-size:.92rem;overflow-x:auto}
+.eq div{white-space:nowrap}
+.wrap{overflow-x:auto}
+
+.slr{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 22px}
+.slr label{display:flex;justify-content:space-between;font-size:.92rem;font-weight:600}
+.slr output{font-variant-numeric:tabular-nums;color:var(--in)}
+.slr input{width:100%;accent-color:var(--in);height:28px}
+.h2{font-size:.95rem;margin:0 0 8px;font-weight:700}
+
+textarea{width:100%;margin-top:10px;padding:10px;font:13px/1.45 ui-monospace,Consolas,monospace;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
+</style></head>
+<body><main>
+<h1>Simulasi 2: Atur Sendiri Datanya</h1>
+<p class="sub">Geser slider untuk menentukan data soal, pilih apa yang ditebak, lalu isi nilai bertanda ? dan tekan Periksa. Tombol Soal acak membuat data baru.</p>
+<div class="row" id="tabs" role="tablist"></div>
+<div class="row sm" id="modes"></div>
+<div id="app"></div>
+<div class="card" id="rkc"><p class="h2">Rekap untuk guru</p>
+<p class="sub" style="margin:0 0 10px">Setelah selesai, isi nama dan kelas, tekan Buat rekap, salin, lalu kirim ke guru.</p>
+<div class="ans"><div><label for="nm">Nama</label><input id="nm" autocomplete="off"></div><div><label for="kl">Kelas</label><input id="kl" autocomplete="off"></div></div>
+<div class="bar"><button class="btn p" id="mk">Buat rekap</button><button class="btn" id="cp">Salin</button><button class="btn" id="rs">Hapus riwayat</button></div>
+<textarea id="rt" readonly rows="10" aria-label="Teks rekap"></textarea><div class="fb" id="rm" aria-live="polite"></div></div>
+
+<script>
+const U={mixer:{t:"Mixer",xl:"kadar garam",zl:"garam",zf:(F,x)=>F*x/100},
+ dryer:{t:"Dryer",xl:"kadar air",zl:"padatan kering",zf:(F,x)=>F*(1-x/100)},
+ evap:{t:"Evaporator",xl:"kadar zat terlarut",zl:"zat terlarut",zf:(F,x)=>F*x/100},
+ dist:{t:"Distilasi",xl:"kadar etanol",zl:"etanol",zf:(F,x)=>F*x/100}};
+const n=v=>Number(v.toFixed(2)).toString().replace(".",","),c=x=>n(x/100);
+const S=(k,l,a,b,s,v)=>({k,l,a,b,s,v});
+const CFG={
+mixer:{
+ fwd:{sl:[S("F1","Laju larutan 1 (kg/jam)",10,200,5,100),S("x1","Kadar garam larutan 1 (%)",0,40,1,30),S("F2","Laju larutan 2 (kg/jam)",10,200,5,50),S("x2","Kadar garam larutan 2 (%)",0,40,1,5)],
+  build(v){const z1=v.F1*v.x1/100,z2=v.F2*v.x2/100,P=v.F1+v.F2,xP=(z1+z2)/P*100;
+   return{ins:[{n:"Larutan 1",F:v.F1,x:v.x1},{n:"Larutan 2",F:v.F2,x:v.x2}],outs:[{n:"Campuran",F:P,x:xP}],u:["o0.F","o0.x"],
+   h:"Mulai dari neraca total untuk laju campuran, lalu neraca garam untuk kadarnya.",
+   s:[`Total: ${n(v.F1)} + ${n(v.F2)} = P → P = ${n(P)} kg/jam`,`Garam: ${n(v.F1)}(${c(v.x1)}) + ${n(v.F2)}(${c(v.x2)}) = P·xP → xP = ${n(z1+z2)}/${n(P)} = ${n(xP)}%`]}}},
+ bwd:{sl:[S("P","Laju campuran yang diinginkan (kg/jam)",50,300,10,200),S("xP","Kadar garam campuran (%)",20,30,1,25),S("x1","Kadar garam larutan 1 (%)",35,50,1,40),S("x2","Kadar garam larutan 2 (%)",0,15,1,5)],
+  build(v){const F1=v.P*(v.xP-v.x2)/(v.x1-v.x2),F2=v.P-F1;
+   return{ins:[{n:"Larutan 1",F:F1,x:v.x1},{n:"Larutan 2",F:F2,x:v.x2}],outs:[{n:"Campuran",F:v.P,x:v.xP}],u:["i0.F","i1.F"],
+   h:"Dua yang tidak diketahui, maka tulis neraca total dan neraca garam, lalu selesaikan sebagai persamaan simultan.",
+   s:[`Total: F1 + F2 = ${n(v.P)}`,`Garam: ${c(v.x1)}F1 + ${c(v.x2)}F2 = ${c(v.xP)}(${n(v.P)}) = ${n(v.P*v.xP/100)}`,`Substitusi F2 = ${n(v.P)} − F1 → F1 = ${n(F1)} kg/jam, F2 = ${n(F2)} kg/jam`]}}}},
+dryer:{
+ fwd:{sl:[S("F","Umpan basah (kg/jam)",50,300,10,150),S("xw","Kadar air umpan (%)",20,80,1,60),S("xp","Kadar air produk (%)",2,15,1,10)],
+  build(v){const z=v.F*(1-v.xw/100),P=z/(1-v.xp/100),W=v.F-P;
+   return{ins:[{n:"Bahan basah",F:v.F,x:v.xw}],outs:[{n:"Produk kering",F:P,x:v.xp},{n:"Uap air",F:W,v:1}],u:["o0.F","o1.F"],
+   h:"Padatan kering tidak ikut menguap. Hitung padatan di umpan, lalu cari produk yang mengandung padatan yang sama.",
+   s:[`Padatan: ${n(v.F)}(1−${c(v.xw)}) = ${n(z)} kg/jam`,`Produk: P(1−${c(v.xp)}) = ${n(z)} → P = ${n(P)} kg/jam`,`Total: ${n(v.F)} = ${n(P)} + W → W = ${n(W)} kg/jam`]}}},
+ bwd:{sl:[S("P","Produk kering yang diinginkan (kg/jam)",30,200,10,100),S("xw","Kadar air umpan (%)",20,80,1,60),S("xp","Kadar air produk (%)",2,15,1,10)],
+  build(v){const z=v.P*(1-v.xp/100),F=z/(1-v.xw/100),W=F-v.P;
+   return{ins:[{n:"Bahan basah",F:F,x:v.xw}],outs:[{n:"Produk kering",F:v.P,x:v.xp},{n:"Uap air",F:W,v:1}],u:["i0.F","o1.F"],
+   h:"Mulai dari produk: berapa padatan di dalamnya? Padatan itu berasal dari umpan.",
+   s:[`Padatan produk: ${n(v.P)}(1−${c(v.xp)}) = ${n(z)} kg/jam`,`Umpan: F(1−${c(v.xw)}) = ${n(z)} → F = ${n(F)} kg/jam`,`Total: ${n(F)} = ${n(v.P)} + W → W = ${n(W)} kg/jam`]}}}},
+evap:{
+ fwd:{sl:[S("F","Umpan (kg/jam)",50,300,10,200),S("xF","Kadar zat terlarut umpan (%)",5,30,1,15),S("xL","Kadar zat terlarut konsentrat (%)",35,70,1,60)],
+  build(v){const z=v.F*v.xF/100,L=z/(v.xL/100),V=v.F-L;
+   return{ins:[{n:"Umpan",F:v.F,x:v.xF}],outs:[{n:"Konsentrat",F:L,x:v.xL},{n:"Uap air",F:V,v:1}],u:["o0.F","o1.F"],
+   h:"Zat terlarut tidak menguap, jadi seluruhnya ada di konsentrat. Hitung zat terlarut di umpan lebih dulu.",
+   s:[`Zat terlarut: ${n(v.F)}(${c(v.xF)}) = ${n(z)} kg/jam`,`Konsentrat: L(${c(v.xL)}) = ${n(z)} → L = ${n(L)} kg/jam`,`Total: ${n(v.F)} = ${n(L)} + V → V = ${n(V)} kg/jam`]}}},
+ bwd:{sl:[S("L","Konsentrat yang diinginkan (kg/jam)",20,150,10,50),S("xF","Kadar zat terlarut umpan (%)",5,30,1,15),S("xL","Kadar zat terlarut konsentrat (%)",35,70,1,60)],
+  build(v){const z=v.L*v.xL/100,F=z/(v.xF/100),V=F-v.L;
+   return{ins:[{n:"Umpan",F:F,x:v.xF}],outs:[{n:"Konsentrat",F:v.L,x:v.xL},{n:"Uap air",F:V,v:1}],u:["i0.F","o1.F"],
+   h:"Mulai dari produk: berapa zat terlarut di dalam konsentrat? Zat itu berasal dari umpan.",
+   s:[`Zat terlarut konsentrat: ${n(v.L)}(${c(v.xL)}) = ${n(z)} kg/jam`,`Umpan: F(${c(v.xF)}) = ${n(z)} → F = ${n(F)} kg/jam`,`Total: ${n(F)} = ${n(v.L)} + V → V = ${n(V)} kg/jam`]}}}},
+dist:{
+ fwd:{sl:[S("F","Umpan campuran etanol-air (kg/jam)",50,300,10,200),S("xF","Kadar etanol umpan (%)",20,40,1,30),S("xD","Kadar etanol distilat (%)",60,95,1,90),S("xB","Kadar etanol residu (%)",2,15,1,10)],
+  build(v){const D=v.F*(v.xF-v.xB)/(v.xD-v.xB),B=v.F-D;
+   return{ins:[{n:"Umpan",F:v.F,x:v.xF}],outs:[{n:"Distilat (D)",F:D,x:v.xD},{n:"Residu (B)",F:B,x:v.xB}],u:["o0.F","o1.F"],
+   h:"Dua yang tidak diketahui (D dan B), maka tulis neraca total dan neraca etanol, lalu selesaikan sebagai persamaan simultan.",
+   s:[`Total: D + B = ${n(v.F)}`,`Etanol: ${c(v.xD)}D + ${c(v.xB)}B = ${n(v.F)}(${c(v.xF)}) = ${n(v.F*v.xF/100)}`,`Substitusi B = ${n(v.F)} − D → D = ${n(D)} kg/jam, B = ${n(B)} kg/jam`]}}},
+ bwd:{sl:[S("D","Distilat yang diinginkan (kg/jam)",20,150,10,100),S("xF","Kadar etanol umpan (%)",20,40,1,30),S("xD","Kadar etanol distilat (%)",60,95,1,90),S("xB","Kadar etanol residu (%)",2,15,1,10)],
+  build(v){const F=v.D*(v.xD-v.xB)/(v.xF-v.xB),B=F-v.D;
+   return{ins:[{n:"Umpan",F:F,x:v.xF}],outs:[{n:"Distilat (D)",F:v.D,x:v.xD},{n:"Residu (B)",F:B,x:v.xB}],u:["i0.F","o1.F"],
+   h:"Tulis neraca total dan neraca etanol dengan F dan B sebagai variabel. Ingat D sudah diketahui.",
+   s:[`Total: F = ${n(v.D)} + B`,`Etanol: ${c(v.xF)}F = ${n(v.D)}(${c(v.xD)}) + ${c(v.xB)}B = ${n(v.D*v.xD/100)} + ${c(v.xB)}B`,`Substitusi F = ${n(v.D)} + B → B = ${n(B)} kg/jam, F = ${n(F)} kg/jam`]}}}}};
+
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function initRk(KEY,gen,clear){const nm=$("nm"),kl=$("kl"),rt=$("rt"),rm=$("rm"),id=LS.get(KEY+"-id",{});nm.value=id.n||"";kl.value=id.k||"";
+ const sv=()=>LS.set(KEY+"-id",{n:nm.value,k:kl.value});nm.oninput=kl.oninput=sv;
+ $("mk").onclick=()=>{rt.value=gen(nm.value.trim()||"-",kl.value.trim()||"-");rm.className="fb";rm.textContent="Rekap dibuat. Tekan Salin."};
+ $("cp").onclick=async()=>{if(!rt.value)$("mk").onclick();try{await navigator.clipboard.writeText(rt.value);rm.className="fb ok";rm.textContent="Tersalin. Tempel di WhatsApp atau Google Classroom."}catch(e){rt.select();try{document.execCommand("copy");rm.className="fb ok";rm.textContent="Tersalin."}catch(e2){rm.className="fb no";rm.textContent="Gagal menyalin otomatis. Blok teks lalu salin manual."}}};
+ let ask=false;$("rs").onclick=()=>{if(!ask){ask=true;$("rs").textContent="Yakin hapus? Tekan lagi";return}ask=false;$("rs").textContent="Hapus riwayat";clear();rt.value="";rm.className="fb";rm.textContent="Riwayat dihapus."}}
+const LOG=LS.get("nm2-log",[]);
+const MODE={fwd:"Tebak produk",bwd:"Tebak umpan yang dibutuhkan"};
+let cu="mixer",md="fwd",V={},R=null,solved=false,typed={},fb={},hint=false;
+const $=s=>document.getElementById(s);
+const vals=()=>{const k=cu+md;if(!V[k]){V[k]={};CFG[cu][md].sl.forEach(s=>V[k][s.k]=s.v)}return V[k]};
+const hid=(key,f)=>!solved&&R.u.includes(key+"."+f);
+const sw=(F,h)=>h?14:Math.max(5,Math.min(22,4+F/9));
+const LY=(i,y,w,two)=>two&&i===1?y+w/2+16:y-w/2-30;
+const arr=(x,y,w,c)=>`<polygon points="${x},${y-w/2-5} ${x+16},${y} ${x},${y+w/2+5}" fill="${c}"/>`;
+function lab(s,key,x,y){const u=U[cu],hF=hid(key,"F"),hx=hid(key,"x");
+ return `<text x="${x}" y="${y}">${s.n}: ${hF?'<tspan class="u">?</tspan>':n(s.F)} kg/jam</text><text class="s" x="${x}" y="${y+15}">${s.v?"air murni":`${u.xl} ${hx?'<tspan class="u">?</tspan>':n(s.x)} %`}</text>`}
+function svg(){const u=U[cu];let g="";const ys=R.ins.length===1?[150]:[120,180];
+ R.ins.forEach((s,i)=>{const y=ys[i],w=sw(s.F,hid("i"+i,"F"));
+  g+=`<line class="flow" x1="30" y1="${y}" x2="224" y2="${y}" stroke="var(--in)" stroke-width="${w}"/>${arr(224,y,w,"var(--in)")}`+lab(s,"i"+i,30,LY(i,y,w,R.ins.length===2))});
+ R.outs.forEach((s,i)=>{const w=sw(s.F,hid("o"+i,"F"));
+  if(s.v)g+=`<line class="flow" x1="320" y1="96" x2="320" y2="52" stroke="var(--vap)" stroke-width="${w}" style="animation-direction:reverse"/><polygon points="${320-w/2-5},52 320,34 ${320+w/2+5},52" fill="var(--vap)"/>`+lab(s,"o"+i,348,38);
+  else{const two=R.outs.length===2&&!R.outs.some(q=>q.v),y=two?[120,180][i]:150;g+=`<line class="flow" x1="416" y1="${y}" x2="610" y2="${y}" stroke="var(--out)" stroke-width="${w}"/>${arr(610,y,w,"var(--out)")}`+lab(s,"o"+i,416,LY(i,y,w,two))}});
+ return `<svg viewBox="0 0 640 230" role="img" aria-label="Diagram aliran ${u.t}"><rect x="224" y="96" width="192" height="108" rx="10" fill="var(--box)" stroke="var(--line)" stroke-width="2"/><text x="320" y="146" text-anchor="middle" style="font-size:16px">${u.t}</text><text class="s" x="320" y="166" text-anchor="middle">steady-state</text>${g}</svg>`}
+function unk(k){const [a,f]=k.split(".");const s=(a[0]==="i"?R.ins:R.outs)[+a.slice(1)];return{val:s[f],l:`${s.n}: ${f==="F"?"laju alir (kg/jam)":U[cu].xl+" (%)"}`}}
+function table(){const u=U[cu],z=s=>s.v?0:u.zf(s.F,s.x),T=(a,fn)=>a.reduce((t,s)=>t+fn(s),0);
+ const Rw=[["Total (kg/jam)",s=>s.F],["Air (kg/jam)",s=>s.F-z(s)],[u.zl[0].toUpperCase()+u.zl.slice(1)+" (kg/jam)",z]];
+ return `<div class="wrap"><table><tr><th>Neraca</th><th>Masuk</th><th>Keluar</th><th>Selisih</th></tr>`+Rw.map(([l,fn])=>{const a=T(R.ins,fn),b=T(R.outs,fn);
+  return `<tr><td>${l}</td><td>${n(a)}</td><td>${n(b)}</td><td class="ok">${Math.abs(a-b)<.05?"0 ✓":n(a-b)}</td></tr>`}).join("")+"</table></div>"}
+function draw(){
+ $("tabs").innerHTML="";$("modes").innerHTML="";
+ for(const k in U){const b=document.createElement("button");b.role="tab";b.setAttribute("aria-selected",k===cu);b.textContent=U[k].t;b.onclick=()=>{cu=k;reset();draw()};$("tabs").appendChild(b)}
+ for(const m in MODE){const b=document.createElement("button");b.setAttribute("aria-selected",m===md);b.textContent=MODE[m];b.onclick=()=>{md=m;reset();draw()};$("modes").appendChild(b)}
+ const v=vals();
+ $("app").innerHTML=`<div class="card"><p class="h2">Tentukan data soal</p><div class="slr">${CFG[cu][md].sl.map(s=>`<div><label for="s_${s.k}">${s.l}<output id="o_${s.k}">${v[s.k]}</output></label><input id="s_${s.k}" type="range" min="${s.a}" max="${s.b}" step="${s.s}" value="${v[s.k]}" data-k="${s.k}"></div>`).join("")}</div>
+ <div class="bar"><button class="btn" id="rnd">Soal acak</button></div></div><div class="card" id="dg"></div><div class="card" id="ans"></div>`;
+ document.querySelectorAll("input[type=range]").forEach(i=>i.oninput=()=>{vals()[i.dataset.k]=+i.value;$("o_"+i.dataset.k).textContent=i.value;reset();update()});
+ $("rnd").onclick=()=>{CFG[cu][md].sl.forEach(s=>{const st=Math.floor((s.b-s.a)/s.s)+1;vals()[s.k]=s.a+s.s*Math.floor(Math.random()*st)});reset();draw()};
+ update();
+}
+function reset(){solved=false;typed={};fb={};hint=false}
+function update(){R=CFG[cu][md].build(vals());
+ $("dg").innerHTML=`<span class="tag">${MODE[md]}</span>`+svg();
+ const a=$("ans");
+ if(solved){a.innerHTML=`<p class="ok" style="margin:0 0 8px">Benar! Berikut hasil lengkap dan pembahasannya.</p>${table()}<div class="eq">${R.s.map(e=>`<div>${e}</div>`).join("")}</div>`;return}
+ a.innerHTML=`<div class="ans">${R.u.map(k=>{const q=unk(k),s=fb[k]||"";return `<div><label for="a_${k}">${q.l}</label><input id="a_${k}" inputmode="decimal" autocomplete="off" value="${typed[k]||""}" class="${s}"><div class="fb ${s}">${s==="no"?"Belum tepat, hitung ulang.":""}</div></div>`}).join("")}</div>
+ <div class="bar"><button class="btn p" id="chk">Periksa</button><button class="btn" id="hnt">Petunjuk</button></div>${hint?`<div class="msg">💡 ${R.h}</div>`:""}`;
+ $("chk").onclick=check;$("hnt").onclick=()=>{R.u.forEach(k=>typed[k]=$("a_"+k).value);hint=true;update()};
+ R.u.forEach(k=>$("a_"+k).addEventListener("keydown",e=>{if(e.key==="Enter")check()}));
+}
+function check(){let all=true;fb={};
+ R.u.forEach(k=>{const el=$("a_"+k);typed[k]=el.value;const x=parseFloat(el.value.replace(",",".")),a=unk(k).val;
+  const ok=isFinite(x)&&Math.abs(x-a)<=Math.max(.01*a,.15);fb[k]=ok?"ok":"no";if(!ok)all=false});
+ LOG.push({t:cu,md,v:{...vals()},a:R.u.map(k=>typed[k]).join("; "),ok:all,h:hint?1:0});if(LOG.length>60)LOG.shift();LS.set("nm2-log",LOG);
+ solved=all;update();if(!all){const f=document.querySelector("input.no");f&&f.focus()}}
+function genRk(nm,kl){const ok=LOG.filter(e=>e.ok).length;
+ const rows=LOG.map((e,i)=>`${i+1}. ${U[e.t].t}, ${MODE[e.md]} | data: ${Object.entries(e.v).map(([a,b])=>a+"="+b).join(", ")} | jawaban: ${e.a} | ${e.ok?"BENAR":"salah"}${e.h?" | pakai petunjuk":""}`);
+ return ["REKAP LATIHAN NERACA MASSA (Simulasi 2)",`Nama: ${nm}`,`Kelas: ${kl}`,`Waktu: ${new Date().toLocaleString("id-ID")}`,`Jumlah pemeriksaan: ${LOG.length} (benar: ${ok})`,"",...(rows.length?rows:["Belum ada pemeriksaan jawaban."])].join("\n")}
+initRk("nm2",genRk,()=>{LOG.length=0;LS.set("nm2-log",LOG)});
+draw();
+</script></main></body></html>

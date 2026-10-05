@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Latihan Neraca Massa Tanpa Reaksi</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f6f9;--fg:#14202e;--mut:#56657a;--card:#fff;--line:#cfd8e3;--in:#1f6fd1;--out:#12906a;--vap:#d9701b;--box:#e6edf5;--bad:#c4372f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e141c;--fg:#e4ebf3;--mut:#93a3b8;--card:#17202b;--line:#2b3949;--in:#5aa2ff;--out:#3fcf9f;--vap:#ff9a4d;--box:#223042;--bad:#ff7b72}}
+:root[data-theme="dark"]{--bg:#0e141c;--fg:#e4ebf3;--mut:#93a3b8;--card:#17202b;--line:#2b3949;--in:#5aa2ff;--out:#3fcf9f;--vap:#ff9a4d;--box:#223042;--bad:#ff7b72}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.35rem;margin:4px 0 2px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:.95rem}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.row button{flex:1;min-width:96px;padding:9px 12px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.row button[aria-selected="true"]{border-color:var(--in);background:var(--in);color:#fff}
+.row.sm button{flex:0 1 auto;min-width:0;font-weight:500;padding:6px 12px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--vap);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.q{margin:0 0 8px;font-size:1.02rem}
+.tag{display:inline-block;font-size:.8rem;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-bottom:6px}
+svg{width:100%;height:auto;display:block}
+svg text{fill:var(--fg);font:600 13px "Segoe UI",system-ui,sans-serif}
+svg .s{font-weight:400;fill:var(--mut);font-size:12px}
+svg .u{fill:var(--vap);font-weight:700}
+.flow{stroke-dasharray:12 9;animation:mv 1s linear infinite}
+@keyframes mv{to{stroke-dashoffset:-21}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+.ans{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px 18px}
+.ans label{display:block;font-size:.92rem;font-weight:600;margin-bottom:2px}
+.ans input{width:100%;padding:9px 10px;font:inherit;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg)}
+.ans input.ok{border-color:var(--out)}.ans input.no{border-color:var(--bad)}
+.fb{font-size:.88rem;min-height:1.2em}.fb.ok{color:var(--out)}.fb.no{color:var(--bad)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:9px 16px;border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;cursor:pointer}
+.btn.p{background:var(--in);border-color:var(--in);color:#fff;font-weight:600}
+.msg{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--box);font-size:.93rem}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600;font-size:.88rem}
+.ok{color:var(--out);font-weight:700}
+.eq{margin-top:10px;padding:10px 12px;background:var(--box);border-radius:8px;font-size:.92rem;overflow-x:auto}
+.eq div{white-space:nowrap}
+.wrap{overflow-x:auto}
+
+textarea{width:100%;margin-top:10px;padding:10px;font:13px/1.45 ui-monospace,Consolas,monospace;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);resize:vertical}
+.h2{font-size:.95rem;margin:0 0 4px;font-weight:700}
+</style></head>
+<body><main>
+<h1>Latihan Neraca Massa Tanpa Reaksi</h1>
+<p class="sub">Pilih proses dan soal. Hitung dulu di bukumu, isi nilai yang ditanyakan (tanda ?), lalu tekan Periksa. Jika benar, hasil lengkap dan pembahasan akan muncul.</p>
+<div class="row" id="tabs" role="tablist"></div>
+<div class="row sm" id="chips"></div>
+<div id="app"></div>
+<div class="card" id="rkc"><p class="h2">Rekap untuk guru</p>
+<p class="sub" style="margin:0 0 10px">Setelah selesai, isi nama dan kelas, tekan Buat rekap, salin, lalu kirim ke guru.</p>
+<div class="ans"><div><label for="nm">Nama</label><input id="nm" autocomplete="off"></div><div><label for="kl">Kelas</label><input id="kl" autocomplete="off"></div></div>
+<div class="bar"><button class="btn p" id="mk">Buat rekap</button><button class="btn" id="cp">Salin</button><button class="btn" id="rs">Hapus riwayat</button></div>
+<textarea id="rt" readonly rows="10" aria-label="Teks rekap"></textarea><div class="fb" id="rm" aria-live="polite"></div></div>
+
+<script>
+const GURU=location.hash==="#guru";
+const U={mixer:{t:"Mixer",xl:"kadar garam",zl:"garam",zf:(F,x)=>F*x/100},
+ dryer:{t:"Dryer",xl:"kadar air",zl:"padatan kering",zf:(F,x)=>F*(1-x/100)},
+ evap:{t:"Evaporator",xl:"kadar zat terlarut",zl:"zat terlarut",zf:(F,x)=>F*x/100},
+ dist:{t:"Distilasi",xl:"kadar etanol",zl:"etanol",zf:(F,x)=>F*x/100}};
+const P={
+mixer:[
+{k:"Maju",q:"Sebuah tangki pengenceran menerima 100 kg/jam larutan garam 20% dan 100 kg/jam air murni. Berapa laju alir dan kadar garam larutan yang keluar?",
+ ins:[{n:"Larutan garam",F:100,x:20},{n:"Air murni",F:100,x:0}],outs:[{n:"Larutan keluar",F:200,x:10}],u:["o0.F","o0.x"],
+ h:"Mulai dari neraca total, lalu neraca garam. Air murni tidak membawa garam.",
+ s:["Total: 100 + 100 = P → P = 200 kg/jam","Garam: 100(0,20) + 100(0) = 200·xP → xP = 20/200 = 10%"]},
+{k:"Mundur",q:"Dari 100 kg/jam larutan garam 40% akan dibuat larutan garam 25% dengan menambahkan air murni. Berapa air murni yang harus ditambahkan dan berapa laju larutan yang dihasilkan?",
+ ins:[{n:"Larutan garam",F:100,x:40},{n:"Air murni",F:60,x:0}],outs:[{n:"Larutan 25%",F:160,x:25}],u:["i1.F","o0.F"],
+ h:"Hitung dulu massa garam yang masuk. Garam tidak berubah jumlahnya, jadi massa garam yang sama ada di larutan keluar.",
+ s:["Garam: 100(0,40) = P(0,25) → P = 160 kg/jam","Total: 100 + W = 160 → W = 60 kg/jam"]},
+{k:"Mundur",q:"Larutan garam 30% dan larutan garam 10% dicampur menjadi 200 kg/jam larutan garam 20%. Berapa laju masing-masing larutan umpan?",
+ ins:[{n:"Larutan 30%",F:100,x:30},{n:"Larutan 10%",F:100,x:10}],outs:[{n:"Campuran",F:200,x:20}],u:["i0.F","i1.F"],
+ h:"Ada dua yang tidak diketahui, maka butuh dua persamaan: neraca total dan neraca garam. Selesaikan sebagai persamaan simultan.",
+ s:["Total: F1 + F2 = 200","Garam: 0,30F1 + 0,10F2 = 0,20(200) = 40","Substitusi F2 = 200 − F1 → 0,20F1 = 20 → F1 = 100, F2 = 100 kg/jam"]}],
+dryer:[
+{k:"Maju",q:"Bahan basah berkadar air 55% masuk dryer 100 kg/jam. Produk kering keluar dengan kadar air 10%. Berapa laju produk kering dan air yang diuapkan?",
+ ins:[{n:"Bahan basah",F:100,x:55}],outs:[{n:"Produk kering",F:50,x:10},{n:"Uap air",F:50,v:1}],u:["o0.F","o1.F"],
+ h:"Padatan kering tidak ikut menguap. Hitung massa padatan di umpan, lalu cari produk yang mengandung padatan yang sama.",
+ s:["Padatan: 100(1−0,55) = 45 kg/jam","Produk: P(1−0,10) = 45 → P = 50 kg/jam","Total: 100 = 50 + W → W = 50 kg/jam"]},
+{k:"Mundur",q:"Dryer harus menghasilkan 100 kg/jam produk berkadar air 10% dari bahan basah berkadar air 40%. Berapa umpan basah yang dibutuhkan dan berapa air yang menguap?",
+ ins:[{n:"Bahan basah",F:150,x:40}],outs:[{n:"Produk kering",F:100,x:10},{n:"Uap air",F:50,v:1}],u:["i0.F","o1.F"],
+ h:"Mulai dari produk: berapa padatan di dalam 100 kg/jam produk? Padatan itu berasal dari umpan.",
+ s:["Padatan produk: 100(1−0,10) = 90 kg/jam","Umpan: F(1−0,40) = 90 → F = 150 kg/jam","Total: 150 = 100 + W → W = 50 kg/jam"]},
+{k:"Mundur",q:"Ikan basah berkadar air 60% dikeringkan menjadi ikan kering berkadar air 20%. Air yang diuapkan 120 kg/jam. Berapa laju umpan ikan basah dan produk ikan kering?",
+ ins:[{n:"Ikan basah",F:240,x:60}],outs:[{n:"Ikan kering",F:120,x:20},{n:"Uap air",F:120,v:1}],u:["i0.F","o0.F"],
+ h:"Tulis neraca padatan dan neraca total dengan F dan P sebagai variabel. Dua persamaan, dua bilangan tak diketahui.",
+ s:["Padatan: F(0,40) = P(0,80) → P = 0,5F","Total: F = P + 120 → F = 0,5F + 120 → F = 240 kg/jam","P = 120 kg/jam"]}],
+evap:[
+{k:"Maju",q:"Evaporator memekatkan 200 kg/jam larutan berkadar zat terlarut 15% menjadi larutan 60%. Berapa laju konsentrat dan uap air yang keluar?",
+ ins:[{n:"Umpan",F:200,x:15}],outs:[{n:"Konsentrat",F:50,x:60},{n:"Uap air",F:150,v:1}],u:["o0.F","o1.F"],
+ h:"Zat terlarut tidak menguap, jadi seluruhnya ada di konsentrat. Hitung massa zat terlarut di umpan lebih dulu.",
+ s:["Zat terlarut: 200(0,15) = 30 kg/jam","Konsentrat: L(0,60) = 30 → L = 50 kg/jam","Total: 200 = 50 + V → V = 150 kg/jam"]},
+{k:"Mundur",q:"Pabrik membutuhkan 100 kg/jam sirup berkadar 50% dari larutan encer berkadar 10%. Berapa umpan yang dibutuhkan dan berapa air yang harus diuapkan?",
+ ins:[{n:"Larutan encer",F:500,x:10}],outs:[{n:"Sirup",F:100,x:50},{n:"Uap air",F:400,v:1}],u:["i0.F","o1.F"],
+ h:"Mulai dari produk: berapa zat terlarut di dalam 100 kg/jam sirup? Zat itu berasal dari umpan.",
+ s:["Zat terlarut sirup: 100(0,50) = 50 kg/jam","Umpan: F(0,10) = 50 → F = 500 kg/jam","Total: 500 = 100 + V → V = 400 kg/jam"]},
+{k:"Mundur",q:"Evaporator menguapkan 300 kg/jam air dari larutan berkadar 20% sehingga menjadi larutan berkadar 50%. Berapa laju umpan dan konsentrat?",
+ ins:[{n:"Umpan",F:500,x:20}],outs:[{n:"Konsentrat",F:200,x:50},{n:"Uap air",F:300,v:1}],u:["i0.F","o0.F"],
+ h:"Tulis neraca total dan neraca zat terlarut dengan F dan L sebagai variabel, lalu selesaikan bersama.",
+ s:["Zat terlarut: F(0,20) = L(0,50) → L = 0,4F","Total: F = L + 300 → F = 0,4F + 300 → F = 500 kg/jam","L = 200 kg/jam"]}],
+dist:[
+{k:"Maju",q:"Kolom distilasi memisahkan 100 kg/jam campuran etanol-air berkadar etanol 40%. Distilat keluar 50 kg/jam dengan kadar etanol 70%. Berapa laju residu dan kadar etanol di dalam residu?",
+ ins:[{n:"Umpan",F:100,x:40}],outs:[{n:"Distilat",F:50,x:70},{n:"Residu",F:50,x:10}],u:["o1.F","o1.x"],
+ h:"Laju residu dari neraca total. Kadar etanol residu dari neraca etanol: etanol umpan dikurangi etanol distilat.",
+ s:["Total: 100 = 50 + B → B = 50 kg/jam","Etanol: 100(0,40) = 50(0,70) + 50·xB → 40 = 35 + 50·xB → xB = 10%"]},
+{k:"Maju",q:"Kolom distilasi menerima 200 kg/jam umpan etanol-air berkadar 30%. Distilat berkadar etanol 90% dan residu berkadar etanol 10%. Berapa laju distilat dan laju residu?",
+ ins:[{n:"Umpan",F:200,x:30}],outs:[{n:"Distilat",F:50,x:90},{n:"Residu",F:150,x:10}],u:["o0.F","o1.F"],
+ h:"Dua yang tidak diketahui (D dan B), maka tulis neraca total dan neraca etanol, lalu selesaikan sebagai persamaan simultan.",
+ s:["Total: D + B = 200","Etanol: 0,90D + 0,10B = 200(0,30) = 60","Substitusi B = 200 − D → 0,80D = 40 → D = 50 kg/jam, B = 150 kg/jam"]},
+{k:"Mundur",q:"Diinginkan 100 kg/jam distilat berkadar etanol 80% dengan residu berkadar etanol 5%, dari umpan berkadar etanol 35%. Berapa laju umpan yang dibutuhkan dan berapa laju residu?",
+ ins:[{n:"Umpan",F:250,x:35}],outs:[{n:"Distilat",F:100,x:80},{n:"Residu",F:150,x:5}],u:["i0.F","o1.F"],
+ h:"Tulis neraca total dan neraca etanol dengan F dan B sebagai variabel. Ingat D = 100 kg/jam sudah diketahui.",
+ s:["Total: F = 100 + B","Etanol: 0,35F = 100(0,80) + 0,05B = 80 + 0,05B","Substitusi: 0,35(100 + B) = 80 + 0,05B → 0,30B = 45 → B = 150 kg/jam, F = 250 kg/jam"]}]};
+const $=s=>document.getElementById(s);
+
+const LS={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function initRk(KEY,gen,clear){const nm=$("nm"),kl=$("kl"),rt=$("rt"),rm=$("rm"),id=LS.get(KEY+"-id",{});nm.value=id.n||"";kl.value=id.k||"";
+ const sv=()=>LS.set(KEY+"-id",{n:nm.value,k:kl.value});nm.oninput=kl.oninput=sv;
+ $("mk").onclick=()=>{rt.value=gen(nm.value.trim()||"-",kl.value.trim()||"-");rm.className="fb";rm.textContent="Rekap dibuat. Tekan Salin."};
+ $("cp").onclick=async()=>{if(!rt.value)$("mk").onclick();try{await navigator.clipboard.writeText(rt.value);rm.className="fb ok";rm.textContent="Tersalin. Tempel di WhatsApp atau Google Classroom."}catch(e){rt.select();try{document.execCommand("copy");rm.className="fb ok";rm.textContent="Tersalin."}catch(e2){rm.className="fb no";rm.textContent="Gagal menyalin otomatis. Blok teks lalu salin manual."}}};
+ let ask=false;$("rs").onclick=()=>{if(!ask){ask=true;$("rs").textContent="Yakin hapus? Tekan lagi";return}ask=false;$("rs").textContent="Hapus riwayat";clear();rt.value="";rm.className="fb";rm.textContent="Riwayat dihapus."}}
+const LOG=LS.get("nm-log",{}),lg=k=>LOG[k]||(LOG[k]={att:0,hint:0,ok:0,last:""});
+const fmt=n=>Number.isInteger(n)?String(n):n.toFixed(1).replace(".",",");
+let cu="mixer",ci=0,solved={},typed={},fb={},hint={},shown={};
+try{solved=JSON.parse(localStorage.getItem("nm-solved")||"{}")}catch(e){}
+const id=()=>cu+ci;
+const hid=(p,key,f)=>!(solved[id()]||shown[id()])&&p.u.includes(key+"."+f);
+const sw=(F,h)=>h?14:Math.max(5,Math.min(22,4+F/9));
+const LY=(i,y,w,two)=>two&&i===1?y+w/2+16:y-w/2-30;
+const arr=(x,y,w,c)=>`<polygon points="${x},${y-w/2-5} ${x+16},${y} ${x},${y+w/2+5}" fill="${c}"/>`;
+function lab(s,key,p,u,x,y,cls=""){const hF=hid(p,key,"F"),hx=hid(p,key,"x");
+ const a=hF?`<tspan class="u">?</tspan>`:fmt(s.F);
+ const b=s.v?"air murni":`${u.xl} ${hx?'<tspan class="u">?</tspan>':fmt(s.x)} %`;
+ return `<text x="${x}" y="${y}">${s.n}: ${a} kg/jam</text><text class="s" x="${x}" y="${y+15}">${b}</text>`}
+function svg(p,u){let g="";const ys=p.ins.length===1?[150]:[120,180];
+ p.ins.forEach((s,i)=>{const y=ys[i],w=sw(s.F,hid(p,"i"+i,"F"));
+  g+=`<line class="flow" x1="30" y1="${y}" x2="224" y2="${y}" stroke="var(--in)" stroke-width="${w}"/>${arr(224,y,w,"var(--in)")}`+lab(s,"i"+i,p,u,30,LY(i,y,w,p.ins.length===2))});
+ p.outs.forEach((s,i)=>{const w=sw(s.F,hid(p,"o"+i,"F"));
+  if(s.v)g+=`<line class="flow" x1="320" y1="96" x2="320" y2="52" stroke="var(--vap)" stroke-width="${w}" style="animation-direction:reverse"/><polygon points="${320-w/2-5},52 320,34 ${320+w/2+5},52" fill="var(--vap)"/>`+lab(s,"o"+i,p,u,348,38);
+  else{const two=p.outs.length===2&&!p.outs.some(q=>q.v),y=two?[120,180][i]:150;g+=`<line class="flow" x1="416" y1="${y}" x2="610" y2="${y}" stroke="var(--out)" stroke-width="${w}"/>${arr(610,y,w,"var(--out)")}`+lab(s,"o"+i,p,u,416,LY(i,y,w,two))}});
+ return `<svg viewBox="0 0 640 230" role="img" aria-label="Diagram aliran ${u.t}"><rect x="224" y="96" width="192" height="108" rx="10" fill="var(--box)" stroke="var(--line)" stroke-width="2"/><text x="320" y="146" text-anchor="middle" style="font-size:16px">${u.t}</text><text class="s" x="320" y="166" text-anchor="middle">steady-state</text>${g}</svg>`}
+function unk(p,k){const [a,f]=k.split(".");const s=(a[0]==="i"?p.ins:p.outs)[+a.slice(1)];return{s,f,val:s[f],l:`${s.n}: ${f==="F"?"laju alir (kg/jam)":U[cu].xl+" (%)"}`}}
+function table(p,u){const z=s=>s.v?0:u.zf(s.F,s.x),S=(a,fn)=>a.reduce((t,s)=>t+fn(s),0);
+ const R=[["Total (kg/jam)",s=>s.F],["Air (kg/jam)",s=>s.F-z(s)],[u.zl[0].toUpperCase()+u.zl.slice(1)+" (kg/jam)",z]];
+ return `<div class="wrap"><table><tr><th>Neraca</th><th>Masuk</th><th>Keluar</th><th>Selisih</th></tr>`+R.map(([l,fn])=>{const a=S(p.ins,fn),b=S(p.outs,fn);
+  return `<tr><td>${l}</td><td>${fmt(a)}</td><td>${fmt(b)}</td><td class="ok">${Math.abs(a-b)<.05?"0 ✓":fmt(a-b)}</td></tr>`}).join("")+"</table></div>"}
+function draw(){
+ $("tabs").innerHTML="";$("chips").innerHTML="";
+ for(const k in U){const b=document.createElement("button");b.role="tab";b.setAttribute("aria-selected",k===cu);
+  const n=P[k].filter((_,i)=>solved[k+i]).length;b.textContent=`${U[k].t} (${n}/${P[k].length})`;b.onclick=()=>{cu=k;ci=0;draw()};$("tabs").appendChild(b)}
+ P[cu].forEach((p,i)=>{const b=document.createElement("button");b.setAttribute("aria-selected",i===ci);b.textContent=`Soal ${i+1}${solved[cu+i]?" ✓":""}`;b.onclick=()=>{ci=i;draw()};$("chips").appendChild(b)});
+ const p=P[cu][ci],u=U[cu],open=!(solved[id()]||shown[id()]);
+ $("app").innerHTML=`<div class="card"><span class="tag">${p.k==="Maju"?"Tebak produk":"Tebak umpan yang dibutuhkan"}</span><p class="q">${p.q}</p>${svg(p,u)}</div>
+ ${open?`<div class="card"><div class="ans">${p.u.map(k=>{const q=unk(p,k);return `<div><label for="a_${k}">${q.l}</label><input id="a_${k}" inputmode="decimal" autocomplete="off" value="${typed[id()+k]||""}" class="${(fb[id()]||{})[k]||""}"><div class="fb ${(fb[id()]||{})[k]||""}">${(fb[id()]||{})[k]==="no"?"Belum tepat, hitung ulang.":""}</div></div>`}).join("")}</div>
+ <div class="bar"><button class="btn p" id="chk">Periksa</button><button class="btn" id="hnt">Petunjuk</button>${GURU?'<button class="btn" id="shw">Tampilkan jawaban (guru)</button>':""}</div>
+ ${hint[id()]?`<div class="msg">💡 ${p.h}</div>`:""}</div>`
+ :`<div class="card"><p class="ok" style="margin:0 0 8px">${solved[id()]?"Benar! Berikut hasil lengkap dan pembahasannya.":"Jawaban ditampilkan."}</p>${table(p,u)}<div class="eq">${p.s.map(e=>`<div>${e}</div>`).join("")}</div>
+ <div class="bar">${ci<P[cu].length-1?'<button class="btn p" id="nxt">Soal berikutnya</button>':""}</div></div>`}`;
+ if(open){$("chk").onclick=check;$("hnt").onclick=()=>{p.u.forEach(k=>typed[id()+k]=$("a_"+k).value);hint[id()]=1;lg(id()).hint=1;LS.set("nm-log",LOG);draw()};if(GURU)$("shw").onclick=()=>{shown[id()]=1;draw()};
+  p.u.forEach(k=>$("a_"+k).addEventListener("keydown",e=>{if(e.key==="Enter")check()}))}
+ else if($("nxt"))$("nxt").onclick=()=>{ci++;draw()};
+}
+function check(){const p=P[cu][ci];let all=true;fb[id()]={};
+ p.u.forEach(k=>{const el=$("a_"+k);typed[id()+k]=el.value;const v=parseFloat(el.value.replace(",",".")),a=unk(p,k).val;
+  const ok=isFinite(v)&&Math.abs(v-a)<=Math.max(.01*a,.15);fb[id()][k]=ok?"ok":"no";if(!ok)all=false});
+ if(all){solved[id()]=1;try{localStorage.setItem("nm-solved",JSON.stringify(solved))}catch(e){}}
+ {const L=lg(id());L.att++;L.last=p.u.map(k=>typed[id()+k]).join("; ");if(all)L.ok=1;LS.set("nm-log",LOG)}
+ draw();if(!all){const f=document.querySelector("input.no");f&&f.focus()}}
+function genRk(nm,kl){let done=0,tot=0;const o=[];
+ for(const k in U){o.push(U[k].t);P[k].forEach((p,i)=>{tot++;const L=LOG[k+i]&&LOG[k+i].att?LOG[k+i]:(solved[k+i]?{att:"-",ok:1,hint:0,last:"-"}:null);
+  if(!L)o.push(`  Soal ${i+1}: belum dikerjakan`);else{if(L.ok)done++;o.push(`  Soal ${i+1}: ${L.ok?"BENAR":"belum benar"} | percobaan ${L.att} | petunjuk ${L.hint?"ya":"tidak"} | jawaban terakhir: ${L.last||"-"}`)}})}
+ return ["REKAP LATIHAN NERACA MASSA (Simulasi 1)",`Nama: ${nm}`,`Kelas: ${kl}`,`Waktu: ${new Date().toLocaleString("id-ID")}`,`Soal benar: ${done} dari ${tot}`,"",...o].join("\n")}
+initRk("nm",genRk,()=>{for(const k in LOG)delete LOG[k];for(const k in solved)delete solved[k];LS.set("nm-log",LOG);LS.set("nm-solved",solved);draw()});
+draw();
+</script></main></body></html>
